@@ -16,6 +16,10 @@ on:
         required: true
         default: '.'
         type: string
+      customTag:
+        description: 'The custom tag of the image'
+        required: true
+        default: 'latest'
               
 permissions:
   id-token: write
@@ -28,7 +32,7 @@ env:
     SUBSCRIPTION_ID: '1e1a8154-8d30-462e-97d7-3970855045f4'
     REGISTRY_FQDN: 'apxdemo-hfcmfdf9eycbf0a4.azurecr.io'
     IMAGE: ${{ inputs.imageName }}
-    TAG: ${{ github.sha }}
+    TAG: ${{ inputs.customTag }}
 
 jobs:
   build-and-deploy:
@@ -53,23 +57,3 @@ jobs:
       - name: Push to ACR
         run: |
           docker push ${{ env.REGISTRY_FQDN }}/${{ inputs.imageName }}:${{ env.TAG }}
-
-      - name: Substitute variables
-        run: |
-          envsubst < ./kube/app_deploy.yml.template > ./kube/app_deploy.yml
-    
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ env.CLIENT_ID }}
-          tenant-id: ${{ env.TENANT_ID }}
-          subscription-id: ${{ env.SUBSCRIPTION_ID }}
-
-      - name: Deploy Manifest
-        uses: azure/cli@v2
-        with:
-          azcliversion: latest
-          inlineScript: |
-            az aks get-credentials --resource-group rg-demos --name apxdemo
-            echo 'Applying YAML deployment...'
-            kubectl apply -f ./kube/app_deploy.yml
