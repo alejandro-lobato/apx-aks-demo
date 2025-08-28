@@ -15,6 +15,11 @@ on:
         required: true
         default: 'apex-demo'
         type: string
+      appPath:
+        description: 'The from where the build takes place'
+        required: true
+        default: '.'
+        type: string
               
 
 # These could be configured as repo variables.
@@ -23,7 +28,6 @@ env:
     TENANT_ID: 'ab4e459b-86aa-4f62-a4f2-f6105fe5993e'
     SUBSCRIPTION_ID: '1e1a8154-8d30-462e-97d7-3970855045f4'
     REGISTRY_FQDN: 'apxdemo-f6bjgrfxe7dfa3h4.azurecr.io'
-    APP_PATH: './src'
 
 jobs:
   build-and-deploy:
@@ -45,7 +49,7 @@ jobs:
             az acr login --name '${{ env.REGISTRY_FQDN }}'
 
             echo "Building Docker image..."
-            docker build -t ${{ env.REGISTRY_FQDN }}/${{ inputs.imageName }}:${{ github.job }} ${{ env.APP_PATH }}
+            docker build -t ${{ env.REGISTRY_FQDN }}/${{ inputs.imageName }}:${{ github.job }} ${{ inputs.appPath }}
 
             echo "Pushing Docker image..."
             docker push ${{ env.REGISTRY_FQDN }}/${{ inputs.imageName }}:${{ github.job }}
