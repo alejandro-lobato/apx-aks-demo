@@ -33,23 +33,22 @@ jobs:
     runs-on: ubuntu-latest
     environment: demo
     steps:
-      - name: Azure Login
-        uses: azure/login@v2
+
+      - name: Default Checkout
+        uses: actions/checkout@v3
+
+      - name: Log in to ACR
+        uses: docker/login-action@v3
         with:
-          client-id: ${{ env.CLIENT_ID }}
-          tenant-id: ${{ env.TENANT_ID }}
-          subscription-id: ${{ env.SUBSCRIPTION_ID }}
+          registry: ${{ env.REGISTRY_FQDN }}
+          username: ${{ env.CLIENT_ID }}
+          password: ${{ secrets.ACR_IDENTITY_SECRET }}
+      
+      - name: Build image
+        run: |
+          docker build -t ${{ env.REGISTRY_FQDN }}/${{ inputs.imageName }}:${{ github.sha }} ${{ inputs.appPath }}
 
-      - name: Build and Push to ACR
-        uses: azure/cli@v2
-        with:
-          azcliversion: latest
-          inlineScript: |
-            echo "Logging into Container Registry..."
-            az acr login --name '${{ env.REGISTRY_FQDN }}'
-
-            echo "Building Docker image..."
-            docker build -t ${{ env.REGISTRY_FQDN }}/${{ inputs.imageName }}:${{ github.job }} ${{ inputs.appPath }}
-
-            echo "Pushing Docker image..."
-            docker push ${{ env.REGISTRY_FQDN }}/${{ inputs.imageName }}:${{ github.job }}
+      - name: Push to ACR
+        run: |
+          docker push ${{ env.REGISTRY_FQDN }}/${{ inputs.imageName }}:${{ github.sha }}
+    
