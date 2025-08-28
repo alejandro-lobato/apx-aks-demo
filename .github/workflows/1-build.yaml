@@ -1,3 +1,0 @@
-# All the build steps for the application.
-# 1. Build app and Dockerfile
-# 2. Make image available to ACR.

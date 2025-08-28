@@ -1,0 +1,51 @@
+# All the build steps for the application.
+# 1. Build app and Dockerfile
+# 2. Make image available to ACR.
+
+name: 'Build and Push to ACR'
+on:
+  workflow_dispatch:
+    inputs:
+      registryName:
+        description: 'The name of the ACR instance'
+        required: true
+        type: string
+      imageName:
+        description: 'The name of the application container image'
+        required: true
+        default: 'apex-demo'
+        type: string
+              
+
+# These could be configured as repo variables.
+env:
+    CLIENT_ID: 'c8450ed2-ef86-4006-846c-12aea5ac50e1'
+    TENANT_ID: 'ab4e459b-86aa-4f62-a4f2-f6105fe5993e'
+    SUBSCRIPTION_ID: '1e1a8154-8d30-462e-97d7-3970855045f4'
+    REGISTRY_FQDN: 'apxdemo-f6bjgrfxe7dfa3h4.azurecr.io'
+    APP_PATH: './src'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ env.CLIENT_ID }}
+          tenant-id: ${{ env.TENANT_ID }}
+          subscription-id: ${{ env.SUBSCRIPTION_ID }}
+
+      - name: Build and Push to ACR
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            echo "Logging into Container Registry..."
+            az acr login --name '${{ env.REGISTRY_FQDN }}'
+
+            echo "Building Docker image..."
+            docker build -t ${{ env.REGISTRY_FQDN }}/${{ inputs.imageName }}:${{ github.job }} ${{ env.APP_PATH }}
+
+            echo "Pushing Docker image..."
+            docker push ${{ env.REGISTRY_FQDN }}/${{ inputs.imageName }}:${{ github.job }}
