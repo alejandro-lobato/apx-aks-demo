@@ -12,7 +12,7 @@ on:
         default: 'apex-demo'
         type: string
       appPath:
-        description: 'The from where the build takes place'
+        description: 'The path from where the build takes place'
         required: true
         default: '.'
         type: string
