@@ -17,6 +17,9 @@ on:
         default: '.'
         type: string
               
+permissions:
+  id-token: write
+  contents: read
 
 # These could be configured as repo variables.
 env:
