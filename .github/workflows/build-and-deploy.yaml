@@ -65,7 +65,7 @@ jobs:
           tenant-id: ${{ env.TENANT_ID }}
           subscription-id: ${{ env.SUBSCRIPTION_ID }}
 
-      - name: Build and Push to ACR
+      - name: Deploy Manifest
         uses: azure/cli@v2
         with:
           azcliversion: latest
